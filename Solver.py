@@ -94,8 +94,7 @@ class Solver:
             }
 
             # Recur
-            if self._solve_recursive(new_board, letters_queue, new_state):
-                return True
+            return self._solve_recursive(new_board, letters_queue, new_state)
 
         return False
     
