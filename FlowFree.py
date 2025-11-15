@@ -36,6 +36,8 @@ if __name__ == "__main__":
     # Crear el tablero
     board = Board(filename)
     
+    print(board)
+    
     # Crear el solver
     
     solver = Solver(board)
