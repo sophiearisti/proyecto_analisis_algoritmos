@@ -1,6 +1,7 @@
 ## =========================================================================
 ## Representacion del tablero del juego Flow Free
 ## =========================================================================
+import utils
 
 class Board:
     
@@ -125,7 +126,7 @@ class Board:
             
             while current != end:
                 x, y = current
-                neighbors = self.get_neighbors(x, y)
+                neighbors = utils.get_non_diagonal_neighbors(x, y, self.width, self.height)
                 
                 # filtrar vecinos validos (mismo letter o celda final)
                 valid_neighbors = []
@@ -141,27 +142,28 @@ class Board:
                     return False  # no hay camino valido
                 
                 # seleccionar el vecino mas cercano a la celda final
-                next_cell = min(valid_neighbors, key=lambda pos: self.distance(pos, end))
+                next_cell = min(valid_neighbors, key=lambda pos: utils.distance(pos, end))
                 
                 previous = current
                 current = next_cell
         
         return True
     
-    # calcular distancia euclidiana entre dos puntos
-    def distance(self, pos1, pos2):
-        return ((pos1[0] - pos2[0]) ** 2 + (pos1[1] - pos2[1]) ** 2) ** 0.5
-    
-    # obtener vecinos validos (dentro del tablero) de una celda
-    # no se consideran diagonales
-    def get_neighbors(self, x, y):
-        neighbors = []
-        if x > 0:
-            neighbors.append((x - 1, y))
-        if x < self.width - 1:
-            neighbors.append((x + 1, y))
-        if y > 0:
-            neighbors.append((x, y - 1))
-        if y < self.height - 1:
-            neighbors.append((x, y + 1))
-        return neighbors
+    def copy(self):
+        # Crear board sin llamar al __init__
+        new_board = Board.__new__(Board)
+
+        new_board.width = self.width
+        new_board.height = self.height
+
+        # Deep copy del grid
+        new_board.grid = [row[:] for row in self.grid]
+
+        # Deep copy de letters
+        new_board.letters = {
+            key: [(x, y) for (x, y) in coords]
+            for key, coords in self.letters.items()
+        }
+
+        return new_board
+
