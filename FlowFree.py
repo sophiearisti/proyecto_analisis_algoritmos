@@ -44,7 +44,7 @@ if __name__ == "__main__":
     
     # Resolver el tablero
     if solver.solve():
-        print("Solucionado!")
-        board.print_board()
+        print("Solucionado! :D")
+        print(board)
     else:
-        print("No se encontró solución.")
+        print("No se encontró solución :( .")
