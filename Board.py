@@ -98,6 +98,7 @@ class Board:
         
     # tablero completo satisface las condiciones del juego
     def is_complete(self):
+        
         # verificar que no haya espacios vacios
         for x in range(self.width):
             for y in range(self.height):

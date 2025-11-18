@@ -37,6 +37,7 @@ class Solver:
         # State is None → choose next letter
         if state is None or state["current"] == state["end"]:
             if not letters_queue:
+                #se llego a todos los destinos, pero no se lleno todo el tablero (falta corregir eso)
                 return False  # No hay mas letras para revisar, pero no hay mas para evaluar
                               #Entonces no hay solucion
 
@@ -96,6 +97,7 @@ class Solver:
             # Recur
             return self._solve_recursive(new_board, letters_queue, new_state)
 
+
         return False
     
     ## =========================================================================
@@ -142,4 +144,9 @@ class Solver:
             
     
     def evaluarBloqueoLetras(self, board, neighbour, value):
+        #coger vecino 
+        #si el veecino es vacio ignorarlo 
+        #si el vecino tiene una letra
+        #si ek vecino es inicio o fin , toca ver si tiene un vecino del mismo color o si tiene un vecino vacio
+        #si ninguno se cumple esta encerradox
         pass
