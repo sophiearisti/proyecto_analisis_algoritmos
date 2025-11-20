@@ -48,3 +48,4 @@ if __name__ == "__main__":
         print(solver.board)
     else:
         print("No se encontró solución :( .")
+        print(solver.board)

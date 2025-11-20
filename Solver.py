@@ -1,9 +1,8 @@
 ## =========================================================================
-## Algoritmo que soluciona recursivamente el juego Flow Free
-## Este encuentra la solucion del tablero utilizando backtracking
+## Algoritmo Flow Free con Inmutabilidad (Copia del Tablero en cada Paso)
 ## =========================================================================
-import utils
-
+import utils 
+import time
 
 class Solver:
     
@@ -16,137 +15,97 @@ class Solver:
     # Iniciar proceso recursivo
     # --------------------------------------------------
     def solve(self):
-        # ordenar las letras a evaluar por distancia entre inicio y final
+        # 1. Heurística: ordenar las letras por distancia entre inicio y final
         letters_queue = list(self.board.letters.keys())
         letters_queue.sort(
             key=lambda L: utils.distance(self.board.letters[L][0],
                                          self.board.letters[L][1])
         )
-
+        print(f"Orden de letras a evaluar: {letters_queue}")
+        
+        # Inicia la recursión con una copia del tablero y el estado inicial (state = None)
         return self._solve_recursive(self.board.copy(), letters_queue, None)
 
     # --------------------------------------------------
-    # funcion recursiva
+    # Función recursiva principal (DFS con Inmutabilidad)
     # --------------------------------------------------
     def _solve_recursive(self, board, letters_queue, state):
-        # Si el table está completamente lleno y correctamente lleno
+        
+        # --- 1. Caso Base y Transición de Color ---
+
+        # Caso base: todos los colores conectados y tablero completo
         if board.is_complete():
             self.board = board
             return True
 
-        # State is None → choose next letter
-        if state is None or state["current"] == state["end"]:
+        # Transición: Elegir el siguiente color si se terminó el anterior (state is None)
+        if state is None: 
             if not letters_queue:
-                #se llego a todos los destinos, pero no se lleno todo el tablero (falta corregir eso)
-                return False  # No hay mas letras para revisar, pero no hay mas para evaluar
-                              #Entonces no hay solucion
+                return False  # No más letras en la cola
 
-            # Tomar la siguiente letra (IMPORTANTE: copiar la cola para que funciona el backtracking)
-            #falta un copy
-            new_queue = letters_queue.copy()
-            letter = new_queue.pop(0)
-
+            # Solo miramos la primera letra, NO la eliminamos de la cola AÚN.
+            letter = letters_queue[0]
             start, end = board.letters[letter]
+            
+            # Establecer el estado inicial (current = start)
             state = {
                 "letter": letter,
                 "current": start,
                 "end": end,
-                "previous": None
             }
 
-            # Continue recursion with this letter
-            return self._solve_recursive(board, new_queue, state)
+        # --- 2. Expansión de la Ruta (DFS) ---
 
-        # --------------------------------------------------
-        # Expand current letter
-        # --------------------------------------------------
         cx, cy = state["current"]
         ex, ey = state["end"]
 
-        # Get empty neighbors
+        # Identificar vecinos válidos (libres o destino)
         neighbors = [
-            n for n in utils.get_non_diagonal_neighbors(cx, cy, board.width, board.height)
-            if board.get_cell(n[0], n[1]) == " "
+            (nx, ny)
+            for (nx, ny) in utils.get_non_diagonal_neighbors(cx, cy, board.width, board.height)
+            # Válido si es un espacio vacío (' ') O el destino
+            if board.get_cell(nx, ny) == " " or (nx, ny) == (ex, ey)
         ]
 
-        # Sort neighbors by distance to endpoint
+
+        # Heurística: Ordenar por distancia al endpoint
         neighbors.sort(key=lambda pos: utils.distance(pos, (ex, ey)))
 
-        # Try each possible neighbor
+        # --- 3. Intentar cada Vecino (Backtracking implícito) ---
         for nx, ny in neighbors:
 
-            # CASE 1: movement creates enclosed cell → skip
-            if self.creates_enclosed_cell(board, (nx, ny)):
-                continue
+            is_destination = (nx, ny) == (ex, ey)
+            original_val = board.get_cell(nx, ny)
 
-            # CASE 2: movement blocks some other letter → skip
-            if self.blocks_other_letter(board, (nx, ny), state["letter"]):
-                continue
+            # Crear la copia del tablero ANTES de aplicar el movimiento
+            new_board = board.copy() 
 
-            # Try placing the letter here
-            new_board = board.copy()
-            new_board.set_cell(nx, ny, state["letter"])
+            # A. Aplicar el Movimiento a la NUEVA copia
+            # Solo marcamos si es celda vacía y no el destino.
+            if not is_destination and original_val == " ":
+                new_board.set_cell(nx, ny, state["letter"])
+                
+            print(f"Colocando '{state['letter']}' en ({nx}, {ny})")
+            print(new_board)
+            time.sleep(0.3)  
 
-            new_state = {
-                "letter": state["letter"],
-                "current": (nx, ny),
-                "end": state["end"],
-                "previous": (cx, cy)
-            }
+            # B. Definir Argumentos de la Siguiente Llamada Recursiva
+            if is_destination:
+                # ÉXITO: La letra se considera resuelta, pasamos a la siguiente.
+                next_letters_queue = letters_queue[1:] 
+                next_state = None 
+            else:
+                # INTERMEDIO: La cola de letras NO cambia, avanzamos la ruta.
+                next_letters_queue = letters_queue 
+                next_state = {
+                    "letter": state["letter"],
+                    "current": (nx, ny),
+                    "end": state["end"],
+                }
 
-            # Recur
-            return self._solve_recursive(new_board, letters_queue, new_state)
-
+            # C. Llamada Recursiva
+            # Pasamos la nueva copia del tablero.
+            if self._solve_recursive(new_board, next_letters_queue, next_state):
+                return True
 
         return False
-    
-    ## =========================================================================
-    ##  FALTA CORREGIR Y EVALUAR TODA ESTA PARTE
-    ## =========================================================================
-        
-    def evaluarCeldaVacia(self, board, neighbour, value):
-        #obtener sus vecinos
-        nx, ny = neighbour
-        empty_neighbours = [n for n in utils.get_neighbors(nx, ny, board.width, board.height) if board.get_cell(n[0], n[1]) == " "]
-        
-        #si ese neighbour tiene 2 o mas celdas vacias vecinas
-        #no es una celda encerrada
-        if len(empty_neighbours) >=2:
-            return False
-        
-        #si esa celda vacia no tiene mas celdas vacias cercanas
-        #esta 100% encerrada
-        elif len(empty_neighbours) ==0:
-            return True
-        
-        #si solo tiene otra, toca ver si las letras circundantes son de inicio o de fin 
-        #si ninguna es de inicio o fin, esta encerrada
-        #si por lo menos alguna es de inicio o de fin
-            # mirar si no tienen valores iguales circundantes. si todas tienen, esta encerrada
-            # si alguna no tiene, puede que no sea un encierro, retornar false
-        else:
-            filled_neighbours = [n for n in utils.get_non_diagonal_neighbors(nx, ny, board.width, board.height) if board.get_cell(n[0], n[1]) != " "]
-            doesntexist = True
-            
-            for i in filled_neighbours:
-                ix, iy = i
-                value=board.grid[ix][iy]
-                
-                if board.letters[value][0] == i:
-                    if len([n for n in utils.get_non_diagonal_neighbors(nx, ny, board.width, board.height) if board.get_cell(n[0], n[1]) == value])==0:
-                        return False
-
-                elif board.letters[value][1] == i:
-                    if len([n for n in utils.get_non_diagonal_neighbors(nx, ny, board.width, board.height) if board.get_cell(n[0], n[1]) == value])==0:
-                        return False
- 
-            return True
-            
-    
-    def evaluarBloqueoLetras(self, board, neighbour, value):
-        #coger vecino 
-        #si el veecino es vacio ignorarlo 
-        #si el vecino tiene una letra
-        #si ek vecino es inicio o fin , toca ver si tiene un vecino del mismo color o si tiene un vecino vacio
-        #si ninguno se cumple esta encerradox
-        pass
