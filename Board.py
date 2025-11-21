@@ -100,14 +100,14 @@ class Board:
 
         #print("\n=== VERIFICANDO TABLERO COMPLETO ===")
 
-        # 1️⃣ Verificar que no haya espacios vacíos
+        # Verificar que no haya espacios vacíos
         for x in range(self.width):
             for y in range(self.height):
                 if self.grid[x][y] == " ":
                     #print(f"[ERROR] Celda vacía encontrada en {(x,y)}")
                     return False
 
-        # 2️⃣ Para cada letra, validar su recorrido tipo serpiente
+        # Para cada letra, validar su recorrido
         for letter, (start, end) in self.letters.items():
             #print(f"\n>>> VALIDANDO LETRA '{letter}'")
             #print(f"    Start = {start}, End = {end}")
@@ -176,8 +176,6 @@ class Board:
 
         #print("✔ TODAS las letras forman caminos válidos.")
         return True
-
-
 
     
     def copy(self):
