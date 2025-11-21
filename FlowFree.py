@@ -6,18 +6,11 @@
 ## MANUAL DE USO 
 ## Este es el archivo principal que ejecuta el juego de buscaminas.
 ## Se debe ejecutar desde la terminal de la siguiente manera:
-## python3 MineSweeper.py width height mines player <arguments>
+## python3 FlowFree.py <filename>.txt
 ## donde:
-## - width: ancho del tablero (numero de columnas)
-## - height: alto del tablero (numero de filas) 
-## - mines: numero de minas
-## - player: archivo del jugador (por ejemplo, code/Player/Random.py)
+## - <filename>.txt es el archivo de texto que contiene la representación del tablero.
 
-## Para poder utilizar el codigo, es necesario tener instaladas las siguientes
-## librerias de Python:
-## - pandas
-## - numpy
-## - scikit-learn
+## Para poder utilizar el codigo, no es necesario instalar librerias externas.
 ## =========================================================================
 
 
