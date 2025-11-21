@@ -172,9 +172,9 @@ class Board:
                   #  print(f"[ERROR] Discontinuidad entre {visited[i]} y {visited[i+1]}")
                     return False
 
-            #print(f"✔ La letra '{letter}' forma un camino válido y continuo.\n")
+            #print(f" La letra '{letter}' forma un camino válido y continuo.\n")
 
-        #print("✔ TODAS las letras forman caminos válidos.")
+        #print(" TODAS las letras forman caminos válidos.")
         return True
 
     
