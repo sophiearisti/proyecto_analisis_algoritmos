@@ -96,59 +96,89 @@ class Board:
     def clear_cell(self, x, y):
         self.grid[x][y] = " "
         
-    # tablero completo satisface las condiciones del juego
     def is_complete(self):
-        
-        # verificar que no haya espacios vacios
+
+        #print("\n=== VERIFICANDO TABLERO COMPLETO ===")
+
+        # 1️⃣ Verificar que no haya espacios vacíos
         for x in range(self.width):
             for y in range(self.height):
                 if self.grid[x][y] == " ":
+                    #print(f"[ERROR] Celda vacía encontrada en {(x,y)}")
                     return False
-                
-        # verificar que todas las letras esten conectadas
-        # (esto es una verificacion basica, se asume que el solver
-        #  se encarga de conectar las letras correctamente)
-        
-        # para cada letra en letters 
-        # obtener la coordenada de inicio e ir recorriendo arriba o abajo, izquierda o derecha
-        # hasta encontrar la otra letra igual 
-        # si hay varias posibilidades, seleccionar la que teng menor distancia con la coordenada final
-        # se selecciona la siguiente celda en funcion de la distancia euclidiana a la celda final
-        # y se sigue con esa asi consecutivamente hasta llegar a la celda final
-        # se debe tener en cuenta la celda anterior para no retroceder
-        # si se llega a un punto de no retorno y no se llego a la celda final, se retorna falso
-        
-        for letter, positions in self.letters.items():
-            start = positions[0]
-            end = positions[1]
-            
-            current = start
-            previous = None
-            
-            while current != end:
+
+        # 2️⃣ Para cada letra, validar su recorrido tipo serpiente
+        for letter, (start, end) in self.letters.items():
+            #print(f"\n>>> VALIDANDO LETRA '{letter}'")
+            #print(f"    Start = {start}, End = {end}")
+
+            # Obtener todas las celdas del color
+            all_cells = {
+                (x, y)
+                for x in range(self.width)
+                for y in range(self.height)
+                if self.grid[x][y] == letter
+            }
+
+           # print(f"    Celdas esperadas: {all_cells}")
+
+            # Recorrido DFS/BFS
+            visited = []
+            stack = [(start, None)]
+
+            #print("    Iniciando recorrido DFS...\n")
+
+            while stack:
+                current, previous = stack.pop()
+                if current in visited:
+                    continue
+
+               # print(f"    Visitando {current}, desde {previous}")
+                visited.append(current)
+
                 x, y = current
                 neighbors = utils.get_non_diagonal_neighbors(x, y, self.width, self.height)
-                
-                # filtrar vecinos validos (mismo letter o celda final)
-                valid_neighbors = []
+
                 for nx, ny in neighbors:
                     if (nx, ny) == end or self.grid[nx][ny] == letter:
-                        valid_neighbors.append((nx, ny))
-                
-                # eliminar el vecino anterior para no retroceder
-                if previous and previous in valid_neighbors:
-                    valid_neighbors.remove(previous)
-                
-                if not valid_neighbors:
-                    return False  # no hay camino valido
-                
-                # seleccionar el vecino mas cercano a la celda final
-                next_cell = min(valid_neighbors, key=lambda pos: utils.distance(pos, end))
-                
-                previous = current
-                current = next_cell
-        
+                        if (nx, ny) != previous:
+                            #print(f"        → Agregando vecino {(nx,ny)} al stack")
+                            stack.append(((nx, ny), current))
+
+            #print(f"\n    Recorrido final visitado: {visited}")
+
+            # 2A️⃣ Validar inicio y fin
+            if visited[0] != start:
+                #print(f"[ERROR] El recorrido NO inicia en start: {start}")
+                return False
+
+            if visited[-1] != end:
+                #print(f"[ERROR] El recorrido NO termina en end: {end}")
+                return False
+
+            # 2B️⃣ Validar que visite todas las celdas del color
+            if set(visited) != all_cells:
+                #print("[ERROR] Las celdas visitadas NO coinciden con todas las celdas del color")
+                #print("        Visitadas:", set(visited))
+                #   print("        Esperadas:", all_cells)
+                return False
+
+            # 2C️⃣ Verificar continuidad (ningún salto)
+            #print("    Verificando continuidad del recorrido...")
+            for i in range(len(visited) - 1):
+                x1, y1 = visited[i]
+                x2, y2 = visited[i + 1]
+                if abs(x1 - x2) + abs(y1 - y2) != 1:
+                  #  print(f"[ERROR] Discontinuidad entre {visited[i]} y {visited[i+1]}")
+                    return False
+
+            #print(f"✔ La letra '{letter}' forma un camino válido y continuo.\n")
+
+        #print("✔ TODAS las letras forman caminos válidos.")
         return True
+
+
+
     
     def copy(self):
         # Crear board sin llamar al __init__

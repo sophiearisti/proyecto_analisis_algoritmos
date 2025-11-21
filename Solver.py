@@ -69,7 +69,7 @@ class Solver:
 
 
         # Heurística: Ordenar por distancia al endpoint
-        neighbors.sort(key=lambda pos: utils.distance(pos, (ex, ey)))
+        neighbors.sort(key=lambda pos: utils.distance(pos, (ex, ey), board, state["letter"]))
 
         # --- 3. Intentar cada Vecino (Backtracking implícito) ---
         for nx, ny in neighbors:
@@ -85,9 +85,9 @@ class Solver:
             if not is_destination and original_val == " ":
                 new_board.set_cell(nx, ny, state["letter"])
                 
-            print(f"Colocando '{state['letter']}' en ({nx}, {ny})")
-            print(new_board)
-            time.sleep(0.3)  
+            #print(f"Colocando '{state['letter']}' en ({nx}, {ny})")
+           # print(new_board)
+            #time.sleep(0.3)  
 
             # B. Definir Argumentos de la Siguiente Llamada Recursiva
             if is_destination:

@@ -1,14 +1,14 @@
-# calcular distancia euclidiana entre dos puntos
 # calcular distancia manhattan entre dos puntos
 # si se pasa un tercer argumento (board, letter), se activa la heurística
+# la distancia solita es solo apara ordenar los puntos antes de hacer la recurrencia
 def distance(pos1, pos2, board=None, letter=None):
     
     # distancia hacia el objetivo  en distancia de montecarlo
     dist_goal = abs(pos1[0] - pos2[0]) + abs(pos1[1] - pos2[1])
 
     # --- si no hay heurística extra, devolvemos distancia normal ---
-    """   if board is None or letter is None:
-        return dist_goal"""
+    if board is None or letter is None:
+        return dist_goal
 
     # --- distancia al resto de celdas ocupadas (queremos MAXIMIZAR) ---
     min_dist = 999999
