@@ -11,6 +11,7 @@
 ## - <filename>.txt es el archivo de texto que contiene la representación del tablero.
 
 ## Para poder utilizar el codigo, no es necesario instalar librerias externas.
+## En la carpeta Boards se encuentran ejemplos de tableros para probar el programa.
 ## =========================================================================
 
 
